@@ -50,15 +50,19 @@ let startTime = 0;
 let elapsedTime = 0;
 
 // --- Sounds ---
-const sndOrb = new Audio('https://www.soundjay.com/button/sounds/button-16.mp3'); // ăn orb
-const sndBossOrb = new Audio('https://www.soundjay.com/button/sounds/button-4.mp3'); // orb bắn boss
-const sndHitBoss = new Audio('https://www.soundjay.com/button/sounds/button-7.mp3'); // boss trúng đạn
-const sndBossDead = new Audio('https://www.soundjay.com/button/sounds/explosion-02.mp3'); // boss chết
-const sndBossSpawn = new Audio('https://www.soundjay.com/button/sounds/button-10.mp3'); // boss spawn
-const sndPowerUp = new Audio('https://www.soundjay.com/button/sounds/button-3.mp3'); // power-up ăn
-const sndGameOver = new Audio('https://www.soundjay.com/button/sounds/button-15.mp3'); // game over
-const bgMusic = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'); 
-bgMusic.loop = true; bgMusic.volume = 0.3;
+const sndOrb = new Audio('https://www.soundjay.com/buttons/sounds/button-47.mp3'); // ăn orb
+const sndBossOrb = new Audio('https://www.soundjay.com/buttons/sounds/button-4.mp3'); // orb bắn boss
+const sndHitBoss = new Audio('https://www.soundjay.com/buttons/sounds/button-7.mp3'); // boss trúng đạn
+const sndBossDead = new Audio('https://www.soundjay.com/mechanical/sounds/explosion-01.mp3'); // boss chết
+const sndBossSpawn = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3'); // boss spawn
+const sndPowerUp = new Audio('https://www.soundjay.com/buttons/sounds/button-47.mp3'); // power-up ăn
+const sndGameOver = new Audio('https://www.soundjay.com/misc/sounds/fail-trombone-03.mp3'); // game over
+const bgMusic = new Audio('https://www.soundjay.com/free-music/sounds/barn-beat-01.mp3'); 
+const bgMusicBoss = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'); //nhac boss
+bgMusicBoss.volume = 0.1;
+
+bgMusic.loop = true; bgMusic.volume = 0.3;sndOrb.volume = 0.1; sndGameOver.volume = 0.2; sndBossOrb.volume = 0.1; sndHitBoss.volume = 0.1; sndPowerUp.volume = 0.2;
+sndBossSpawn.volume = 0.2;
 
 // --- Game Functions ---
 function startGame(){ 
@@ -69,7 +73,7 @@ function startGame(){
   nextSupermanDelay = 30000 + Math.random()*30000; // ⭐ FIX
   startTime = Date.now();
 
-  bgMusic.currentTime=0; bgMusic.play();
+  bgMusic.currentTime=0; bgMusic.play(); bgMusicBoss.pause;
 }
 
 function spawnOrbs(){ 
@@ -88,6 +92,9 @@ function spawnBoss(){
   const hp=10+Math.floor(level/5-1)*5; 
   boss={x:canvas.width/2, y:-60, r:32,hp:hp,maxHp:hp,trail:[],frozen:false, spawnAnim:true, spawnStep:0}; 
   sndBossSpawn.play();
+  //bgMusicBoss.play(); 
+  //bgMusic.pause();
+  
 }
 
 function increaseEnemiesForNewLevel(){ 
@@ -127,7 +134,7 @@ function gameOver(){
   const shareText = encodeURIComponent(`Tôi vừa đạt ${score} điểm trong CircleSurvival 3D! Bạn thử xem nào!`);
   const minutes = Math.floor(elapsedTime / 60);
   const seconds = elapsedTime % 60;
-
+  
   menu.style.display="flex";
   menu.innerHTML=`
     <h2>💀 Thua rồi</h2>
@@ -138,6 +145,7 @@ function gameOver(){
 	<button onclick='shareFacebook()'>Share Facebook</button>  
   `;
 }
+
 
 // --- Draw helpers ---
 function drawCircle(x,y,r,color){ ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
@@ -266,7 +274,8 @@ function update(){
 
   for(let i=bullets.length-1;i>=0;i--){ const b=bullets[i]; b.x+=b.vx; b.y+=b.vy; if(boss && Math.hypot(b.x-boss.x,b.y-boss.y)<boss.r){ boss.hp--; sndHitBoss.play(); createParticle(boss.x,boss.y,"crimson",5); bullets.splice(i,1); } else if(b.x<0||b.x>canvas.width||b.y<0||b.y>canvas.height) bullets.splice(i,1); }
 
-  if(boss && !boss.spawnAnim){ if(!boss.frozen){ boss.trail.push({x:boss.x,y:boss.y}); if(boss.trail.length>8) boss.trail.shift(); boss.x+=(player.x-boss.x)*0.02; boss.y+=(player.y-boss.y)*0.02; } if(Math.hypot(player.x-boss.x,player.y-boss.y)<player.r+boss.r) gameOver(); if(boss.hp<=0){ sndBossDead.play(); createBossDeathParticles(); boss=null; spawnOrbs(); } }
+  if(boss && !boss.spawnAnim){ if(!boss.frozen){ boss.trail.push({x:boss.x,y:boss.y}); if(boss.trail.length>8) boss.trail.shift(); boss.x+=(player.x-boss.x)*0.02; boss.y+=(player.y-boss.y)*0.02; } if(Math.hypot(player.x-boss.x,player.y-boss.y)<player.r+boss.r) gameOver(); if(boss.hp<=0){ 
+    sndBossDead.play(); createBossDeathParticles(); boss=null; spawnOrbs(); bgMusic.play(); bgMusicBoss.pause} }
 
   for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.life--; if(p.life<=0) particles.splice(i,1); }
 
